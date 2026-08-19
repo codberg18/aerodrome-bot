@@ -4,14 +4,19 @@
         Title="Aerodrome Sniper"
         Width="1440" Height="900" MinWidth="1240" MinHeight="760"
         WindowStartupLocation="CenterScreen"
-        Background="#090E1F" FontSize="13" Foreground="White">
+        Background="{StaticResource BackgroundBrush}"
+        FontFamily="{StaticResource InterFont}" FontSize="13"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="236" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="#0B1022" BorderBrush="#1B2039" BorderThickness="0,0,1,0">
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="{StaticResource SidebarBrush}"
+                BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="0,0,1,0">
             <Grid Margin="16,20,16,16">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -20,25 +25,29 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
+                <!-- Logo -->
                 <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="4,0,0,0">
-                    <Border Width="36" Height="36" CornerRadius="10" Background="#2660F5">
+                    <Border Width="36" Height="36" CornerRadius="10"
+                            Background="{StaticResource LogoGradientBrush}">
                         <TextBlock Text="A" FontSize="18" FontWeight="Bold" Foreground="White"
-                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0" />
                     </Border>
                     <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="Aerodrome" FontSize="15" FontWeight="Bold" />
-                        <TextBlock Text="SNIPER" FontSize="9.5" FontWeight="SemiBold" Foreground="#959CBF"
-                                   Margin="0,1,0,0" />
+                        <TextBlock Text="SNIPER" FontSize="9.5" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMutedBrush}" Margin="0,1,0,0" />
                     </StackPanel>
                 </StackPanel>
 
-                <ListBox Grid.Row="1" Margin="0,24,0,0" Background="Transparent" BorderThickness="0"
+                <!-- Navigation -->
+                <ListBox Grid.Row="1" Margin="0,24,0,0" Style="{StaticResource NavList}"
                          ItemsSource="{Binding Pages}" SelectedItem="{Binding CurrentPage}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="4,8">
+                            <StackPanel Orientation="Horizontal">
                                 <Path Data="{Binding Icon}" Width="18" Height="18" Stretch="Uniform"
-                                      Stroke="#959CBF" StrokeThickness="1.8" StrokeStartLineCap="Round"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=ListBoxItem}}"
+                                      StrokeThickness="1.8" StrokeStartLineCap="Round"
                                       StrokeEndLineCap="Round" StrokeLineJoin="Round"
                                       VerticalAlignment="Center" />
                                 <TextBlock Text="{Binding Title}" Margin="12,0,0,0" VerticalAlignment="Center" />
@@ -47,11 +56,13 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
 
-                <Border Grid.Row="3" Background="#11162B" CornerRadius="12" BorderBrush="#1B2039"
-                        BorderThickness="1" Padding="14">
+                <!-- Network status -->
+                <Border Grid.Row="3" Background="{StaticResource SurfaceBrush}" CornerRadius="12"
+                        BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1" Padding="14">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Ellipse Width="8" Height="8" Fill="#4ADE80" VerticalAlignment="Center" />
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource ProfitBrush}"
+                                     VerticalAlignment="Center" />
                             <TextBlock Text="Base network" FontSize="12.5" FontWeight="SemiBold"
                                        Margin="8,0,0,0" VerticalAlignment="Center" />
                         </StackPanel>
@@ -64,45 +75,50 @@
                                 <RowDefinition Height="Auto" />
                                 <RowDefinition Height="Auto" />
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Block" FontSize="11" Foreground="#959CBF" />
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Block" FontSize="11"
+                                       Foreground="{StaticResource TextMutedBrush}" />
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding BlockHeight}" FontSize="11"
-                                       Foreground="#959CBF" HorizontalAlignment="Right" />
+                                       Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Right" />
                             <TextBlock Grid.Row="1" Grid.Column="0" Text="Gas" FontSize="11" Margin="0,5,0,0"
-                                       Foreground="#959CBF" />
+                                       Foreground="{StaticResource TextMutedBrush}" />
                             <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding GasPrice}" FontSize="11"
-                                       Margin="0,5,0,0" Foreground="#959CBF" HorizontalAlignment="Right" />
+                                       Margin="0,5,0,0" Foreground="{StaticResource TextMutedBrush}"
+                                       HorizontalAlignment="Right" />
                         </Grid>
                     </StackPanel>
                 </Border>
             </Grid>
         </Border>
 
+        <!-- Content -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!-- Top bar -->
             <Grid Grid.Row="0" Margin="28,20,28,16">
                 <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{Binding CurrentPage.Title}" FontSize="22" FontWeight="SemiBold" />
-                    <TextBlock Text="{Binding CurrentPage.Subtitle}" FontSize="12" Foreground="#959CBF"
-                               Margin="0,2,0,0" />
+                    <TextBlock Text="{Binding CurrentPage.Title}" Style="{StaticResource PageTitle}" />
+                    <TextBlock Text="{Binding CurrentPage.Subtitle}" Style="{StaticResource PageSubtitle}" />
                 </StackPanel>
-                <Border HorizontalAlignment="Right" CornerRadius="999" Background="#161B32"
-                        BorderBrush="#252B48" BorderThickness="1" Padding="12,5" VerticalAlignment="Center">
+                <Border Style="{StaticResource Pill}" HorizontalAlignment="Right">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="ETH" FontSize="12" FontWeight="SemiBold" Foreground="#959CBF"
-                                   VerticalAlignment="Center" />
+                        <TextBlock Text="ETH" FontSize="12" FontWeight="SemiBold"
+                                   Foreground="{StaticResource TextMutedBrush}" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding EthPriceUsd}" FontSize="12.5" FontWeight="SemiBold"
                                    Margin="8,0,0,0" VerticalAlignment="Center" />
                         <TextBlock Text="{Binding EthChangePct}" FontSize="12" FontWeight="SemiBold"
-                                   Foreground="#4ADE80" Margin="8,0,0,0" VerticalAlignment="Center" />
+                                   Foreground="{StaticResource ProfitBrush}" Margin="8,0,0,0"
+                                   VerticalAlignment="Center" />
                     </StackPanel>
                 </Border>
             </Grid>
-            <Border Grid.Row="0" VerticalAlignment="Bottom" BorderBrush="#1B2039" BorderThickness="0,0,0,1" />
+            <Border Grid.Row="0" VerticalAlignment="Bottom" BorderBrush="{StaticResource BorderSubtleBrush}"
+                    BorderThickness="0,0,0,1" />
 
+            <!-- Page -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False" />
         </Grid>
     </Grid>
