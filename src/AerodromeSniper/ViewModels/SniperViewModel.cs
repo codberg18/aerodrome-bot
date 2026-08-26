@@ -17,11 +17,8 @@ public partial class SniperViewModel : PageViewModel
     public override Geometry Icon => IconRes.Get("IconCrosshair");
 
     public ObservableCollection<PoolRow> Pools { get; } = [];
-    public ObservableCollection<SniperRuleRow> Rules { get; } = [];
-    public ObservableCollection<RecentBuyRow> RecentBuys { get; } = [];
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(ConfirmBuyCommand))]
     private PoolRow? _selectedPool;
 
     [ObservableProperty]
@@ -36,27 +33,10 @@ public partial class SniperViewModel : PageViewModel
     [ObservableProperty]
     private int _quoteIndex;
 
-    [ObservableProperty]
-    private string _buyAmountUsd = "250";
-
-    [ObservableProperty]
-    private string _slippagePct = "1.0";
-
-    [ObservableProperty]
-    private bool _hasRecentBuys;
-
     public SniperViewModel()
     {
         SeedPools();
         ApplyFilters();
-
-        Rules.Add(new SniperRuleRow
-        {
-            Name = "Fresh WETH pools",
-            FiltersText = "liq ≥ $10,000 · age ≤ 5 min · WETH",
-            BuyAmountText = "$250 per snipe",
-            TpSlText = "TP +50% · SL -25%"
-        });
     }
 
     partial void OnSearchTextChanged(string value) => ApplyFilters();
@@ -67,8 +47,6 @@ public partial class SniperViewModel : PageViewModel
     [RelayCommand]
     private void ScanNow()
     {
-        // TODO: merge scanned pools with the live feed service once it lands,
-        // right now scan just prepends whatever the api returned last
         var pool = MakePool(_scanCounter++);
         _allPools.Insert(0, pool);
         ApplyFilters();
@@ -76,28 +54,6 @@ public partial class SniperViewModel : PageViewModel
 
     [RelayCommand]
     private void SelectPool(PoolRow pool) => SelectedPool = pool;
-
-    private bool CanConfirmBuy() => SelectedPool is not null;
-
-    [RelayCommand]
-    private void ConfirmBuy()
-    {
-        if (SelectedPool is null) return;
-        RecentBuys.Insert(0, new RecentBuyRow
-        {
-            Symbol = SelectedPool.BaseSymbol,
-            AmountText = "$" + BuyAmountUsd,
-            TimeText = "just now"
-        });
-        if (RecentBuys.Count > 6) RecentBuys.RemoveAt(RecentBuys.Count - 1);
-        HasRecentBuys = true;
-    }
-
-    [RelayCommand]
-    private void AddRule(SniperRuleRow rule) => Rules.Add(rule);
-
-    [RelayCommand]
-    private void RemoveRule(SniperRuleRow rule) => Rules.Remove(rule);
 
     private void ApplyFilters()
     {
