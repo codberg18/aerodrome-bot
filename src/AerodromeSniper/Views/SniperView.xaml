@@ -82,23 +82,33 @@
                                                            Foreground="{StaticResource PrimaryBrush}" />
                                             </Border>
                                         </StackPanel>
-                                            <TextBlock FontSize="10.5" FontFamily="Consolas"
-                                                       Foreground="{StaticResource TextFaintBrush}" Margin="0,2,0,0">
-                                                <Run Text="{Binding Address, Mode=OneWay}" /><Run Text=" · " /><Run Text="{Binding DexTag, Mode=OneWay}" />
-                                            </TextBlock>
+                                        <TextBlock Text="{Binding Address}" FontSize="10.5" FontFamily="Consolas"
+                                                   Foreground="{StaticResource TextFaintBrush}" Margin="0,2,0,0" />
                                     </StackPanel>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTextColumn Header="AGE" Width="64" Binding="{Binding AgeText}"
+                    <DataGridTemplateColumn Header="DEX" Width="0.9*" SortMemberPath="DexTag">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Badge}" Background="{StaticResource SurfaceRaisedBrush}"
+                                        HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding DexTag}" Style="{StaticResource BadgeText}"
+                                               Foreground="{StaticResource TextMutedBrush}" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="AGE" Width="0.7*" Binding="{Binding AgeText}"
                                         SortMemberPath="AgeMinutes" />
-                    <DataGridTextColumn Header="LIQUIDITY" Width="92" Binding="{Binding LiquidityText}"
+                    <DataGridTextColumn Header="LIQUIDITY" Width="*" Binding="{Binding LiquidityText}"
                                         SortMemberPath="LiquidityUsd" />
-                    <DataGridTextColumn Header="VOLUME 24H" Width="96" Binding="{Binding VolumeText}" />
-                    <DataGridTextColumn Header="PRICE" Width="92" Binding="{Binding PriceText}" />
-                    <DataGridTemplateColumn Header="24H" Width="64" SortMemberPath="ChangePct">
+                    <DataGridTextColumn Header="VOLUME 24H" Width="*" Binding="{Binding VolumeText}" />
+                    <DataGridTextColumn Header="PRICE" Width="*" Binding="{Binding PriceText}" />
+                    <DataGridTemplateColumn Header="24H" Width="0.7*" SortMemberPath="ChangePct">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ChangePct, Converter={StaticResource PnlFormat}}"
