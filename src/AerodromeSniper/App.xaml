@@ -9,6 +9,8 @@
         <conv:PnlBrushConverter x:Key="PnlBrush" />
         <conv:PnlFormatConverter x:Key="PnlFormat" />
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <conv:NullVisibilityConverter x:Key="NullToCollapsed" />
+        <conv:NullVisibilityConverter x:Key="NullToVisible" Invert="True" />
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
             <views:DashboardView />
         </DataTemplate>

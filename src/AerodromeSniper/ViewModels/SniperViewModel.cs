@@ -17,8 +17,10 @@ public partial class SniperViewModel : PageViewModel
     public override Geometry Icon => IconRes.Get("IconCrosshair");
 
     public ObservableCollection<PoolRow> Pools { get; } = [];
+    public ObservableCollection<RecentBuyRow> RecentBuys { get; } = [];
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmBuyCommand))]
     private PoolRow? _selectedPool;
 
     [ObservableProperty]
@@ -32,6 +34,15 @@ public partial class SniperViewModel : PageViewModel
 
     [ObservableProperty]
     private int _quoteIndex;
+
+    [ObservableProperty]
+    private string _buyAmountUsd = "250";
+
+    [ObservableProperty]
+    private string _slippagePct = "1.0";
+
+    [ObservableProperty]
+    private bool _hasRecentBuys;
 
     public SniperViewModel()
     {
@@ -54,6 +65,22 @@ public partial class SniperViewModel : PageViewModel
 
     [RelayCommand]
     private void SelectPool(PoolRow pool) => SelectedPool = pool;
+
+    private bool CanConfirmBuy() => SelectedPool is not null;
+
+    [RelayCommand]
+    private void ConfirmBuy()
+    {
+        if (SelectedPool is null) return;
+        RecentBuys.Insert(0, new RecentBuyRow
+        {
+            Symbol = SelectedPool.BaseSymbol,
+            AmountText = "$" + BuyAmountUsd,
+            TimeText = "just now"
+        });
+        if (RecentBuys.Count > 6) RecentBuys.RemoveAt(RecentBuys.Count - 1);
+        HasRecentBuys = true;
+    }
 
     private void ApplyFilters()
     {
