@@ -18,6 +18,7 @@ public partial class SniperViewModel : PageViewModel
 
     public ObservableCollection<PoolRow> Pools { get; } = [];
     public ObservableCollection<RecentBuyRow> RecentBuys { get; } = [];
+    public ObservableCollection<SniperRuleRow> Rules { get; } = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmBuyCommand))]
@@ -48,6 +49,14 @@ public partial class SniperViewModel : PageViewModel
     {
         SeedPools();
         ApplyFilters();
+
+        Rules.Add(new SniperRuleRow
+        {
+            Name = "Fresh WETH pools",
+            FiltersText = "liq ≥ $10,000 · age ≤ 5 min · WETH",
+            BuyAmountText = "$250 per snipe",
+            TpSlText = "TP +50% · SL -25%"
+        });
     }
 
     partial void OnSearchTextChanged(string value) => ApplyFilters();
@@ -81,6 +90,12 @@ public partial class SniperViewModel : PageViewModel
         if (RecentBuys.Count > 6) RecentBuys.RemoveAt(RecentBuys.Count - 1);
         HasRecentBuys = true;
     }
+
+    [RelayCommand]
+    private void AddRule(SniperRuleRow rule) => Rules.Add(rule);
+
+    [RelayCommand]
+    private void RemoveRule(SniperRuleRow rule) => Rules.Remove(rule);
 
     private void ApplyFilters()
     {

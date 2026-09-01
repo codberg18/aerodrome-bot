@@ -18,6 +18,39 @@
                            Foreground="{StaticResource TextFaintBrush}" VerticalAlignment="Center" />
             </Grid>
         </DataTemplate>
+
+        <DataTemplate DataType="{x:Type models:SniperRuleRow}">
+            <Border Background="{StaticResource SurfaceRaisedBrush}" CornerRadius="12" Padding="14" Margin="0,0,0,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton Grid.Column="0" Style="{StaticResource ToggleSwitch}"
+                                  IsChecked="{Binding Enabled}" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" />
+                        <TextBlock Text="{Binding FiltersText}" FontSize="11" Margin="0,3,0,0"
+                                   Foreground="{StaticResource TextMutedBrush}" />
+                        <StackPanel Orientation="Horizontal" Margin="0,3,0,0">
+                            <TextBlock Text="{Binding BuyAmountText}" FontSize="11"
+                                       Foreground="{StaticResource TextMutedBrush}" />
+                            <TextBlock Text="{Binding TpSlText}" FontSize="11" Margin="10,0,0,0"
+                                       Foreground="{StaticResource WarningBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+                    <Button Grid.Column="2" Style="{StaticResource IconButton}" VerticalAlignment="Top"
+                            Command="{Binding DataContext.RemoveRuleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"
+                            ToolTip="Delete rule">
+                        <Path Data="{StaticResource IconTrash}" Width="14" Height="14" Stretch="Uniform"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="1.8" StrokeLineJoin="Round" StrokeStartLineCap="Round" />
+                    </Button>
+                </Grid>
+            </Border>
+        </DataTemplate>
     </UserControl.Resources>
     <Grid Margin="28,22,28,28">
         <Grid.RowDefinitions>
@@ -146,8 +179,15 @@
             </DataGrid>
             </Border>
 
+            <!-- Right panel -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
             <!-- Quick buy -->
-            <Border Grid.Column="1" Style="{StaticResource Card}" VerticalAlignment="Top">
+            <Border Grid.Row="0" Style="{StaticResource Card}" Margin="0,0,0,16">
                 <StackPanel>
                     <TextBlock Text="QUICK BUY" Style="{StaticResource CardLabel}" />
 
@@ -185,6 +225,33 @@
                                Visibility="{Binding HasRecentBuys, Converter={StaticResource InverseBoolToVis}}" />
                 </StackPanel>
             </Border>
+
+            <!-- Auto-snipe rules -->
+            <Border Grid.Row="1" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <TextBlock Text="AUTO-SNIPE RULES" Style="{StaticResource CardLabel}" VerticalAlignment="Center" />
+                        <Button Style="{StaticResource GhostButton}" Height="30" Padding="10,0"
+                                HorizontalAlignment="Right" Click="OnAddRule">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconPlus}" Width="12" Height="12" Stretch="Uniform"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                                      VerticalAlignment="Center" Margin="0,0,6,0" />
+                                <TextBlock Text="New rule" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                    <ScrollViewer Grid.Row="1" Margin="0,12,-8,0" VerticalScrollBarVisibility="Auto">
+                        <ItemsControl ItemsSource="{Binding Rules}" />
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+            </Grid>
         </Grid>
     </Grid>
 </UserControl>
