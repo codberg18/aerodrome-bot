@@ -11,6 +11,7 @@
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <conv:NullVisibilityConverter x:Key="NullToCollapsed" />
         <conv:NullVisibilityConverter x:Key="NullToVisible" Invert="True" />
+        <conv:InverseBoolVisibilityConverter x:Key="InverseBoolToVis" />
         <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
             <views:DashboardView />
         </DataTemplate>

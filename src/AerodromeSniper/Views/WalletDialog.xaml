@@ -1,0 +1,46 @@
+<Window x:Class="AerodromeSniper.Views.WalletDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add wallet" Width="440" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" ResizeMode="NoResize"
+        Background="{StaticResource BackgroundBrush}"
+        FontFamily="{StaticResource InterFont}" FontSize="13"
+        Foreground="{StaticResource TextPrimaryBrush}" UseLayoutRounding="True">
+    <StackPanel Margin="24">
+        <TextBlock Text="WALLET ADDRESS" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+        <TextBox x:Name="AddressBox" Style="{StaticResource TextInput}" FontFamily="Consolas"
+                 Text="0x0000000000000000000000000000000000000000" />
+
+        <TextBlock Text="LABEL" Style="{StaticResource CardLabel}" Margin="0,16,0,8" />
+        <TextBox x:Name="LabelBox" Style="{StaticResource TextInput}" Text="My wallet" />
+
+        <Grid Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="COPY MODE" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                <ComboBox x:Name="ModeBox" Style="{StaticResource DarkComboBox}" SelectedIndex="0">
+                    <ComboBoxItem Content="Fixed amount" />
+                    <ComboBoxItem Content="Percent of their size" />
+                </ComboBox>
+            </StackPanel>
+            <StackPanel Grid.Column="2">
+                <TextBlock x:Name="AmountLabel" Text="AMOUNT (USDC)" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                <TextBox x:Name="AmountBox" Style="{StaticResource TextInput}" Text="250" />
+            </StackPanel>
+        </Grid>
+
+        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+            <ToggleButton x:Name="EnabledToggle" Style="{StaticResource ToggleSwitch}" IsChecked="True" />
+            <TextBlock Text="Start copying immediately" VerticalAlignment="Center" Margin="12,0,0,0" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,24,0,0">
+            <Button Style="{StaticResource SecondaryButton}" Content="Cancel" Click="OnCancel" />
+            <Button Style="{StaticResource PrimaryButton}" Content="Add wallet" Margin="12,0,0,0" Click="OnSave" />
+        </StackPanel>
+    </StackPanel>
+</Window>
