@@ -61,38 +61,76 @@
     </UserControl.Resources>
 
     <Grid Margin="28,22,28,28">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="400" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
 
-        <Grid Grid.Row="0" Margin="0,0,0,14">
-            <TextBlock Text="WATCHLIST" Style="{StaticResource CardLabel}" VerticalAlignment="Center" />
-            <Button Style="{StaticResource SecondaryButton}" Height="34" Padding="14,0"
-                    HorizontalAlignment="Right" Click="OnAddWallet">
-                <StackPanel Orientation="Horizontal">
-                    <Path Data="{StaticResource IconPlus}" Width="12" Height="12" Stretch="Uniform"
-                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
-                          StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
-                          VerticalAlignment="Center" Margin="0,0,6,0" />
-                    <TextBlock Text="Add wallet" FontSize="12" VerticalAlignment="Center" />
+        <!-- Watchlist -->
+        <Grid Grid.Column="0" Margin="0,0,16,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,14">
+                <TextBlock Text="WATCHLIST" Style="{StaticResource CardLabel}" VerticalAlignment="Center" />
+                <Button Style="{StaticResource SecondaryButton}" Height="34" Padding="14,0"
+                        HorizontalAlignment="Right" Click="OnAddWallet">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource IconPlus}" Width="12" Height="12" Stretch="Uniform"
+                              Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                              StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBlock Text="Add wallet" FontSize="12" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,-10,0"
+                          Visibility="{Binding HasWallets, Converter={StaticResource BoolToVis}}">
+                <ItemsControl ItemsSource="{Binding Wallets}" />
+            </ScrollViewer>
+
+            <Border Grid.Row="1" Style="{StaticResource Card}" VerticalAlignment="Center"
+                    Visibility="{Binding HasWallets, Converter={StaticResource InverseBoolToVis}}">
+                <StackPanel HorizontalAlignment="Center" Margin="0,16">
+                    <Path Style="{StaticResource EmptyIcon}" Data="{StaticResource IconUsers}" />
+                    <TextBlock Text="No wallets yet" Style="{StaticResource EmptyTitle}" />
+                    <TextBlock Style="{StaticResource EmptyHint}" MaxWidth="280" TextAlignment="Center"
+                               Text="Add a wallet address and Aerodrome Sniper will mirror its swaps on this account." />
                 </StackPanel>
-            </Button>
+            </Border>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,-10,0"
-                      Visibility="{Binding HasWallets, Converter={StaticResource BoolToVis}}">
-            <ItemsControl ItemsSource="{Binding Wallets}" />
-        </ScrollViewer>
-
-        <Border Grid.Row="1" Style="{StaticResource Card}" VerticalAlignment="Center"
-                Visibility="{Binding HasWallets, Converter={StaticResource InverseBoolToVis}}">
-            <StackPanel HorizontalAlignment="Center" Margin="0,16">
-                <Path Style="{StaticResource EmptyIcon}" Data="{StaticResource IconUsers}" />
-                <TextBlock Text="No wallets yet" Style="{StaticResource EmptyTitle}" />
-                <TextBlock Style="{StaticResource EmptyHint}" MaxWidth="280" TextAlignment="Center"
-                           Text="Add a wallet address and Aerodrome Sniper will mirror its swaps on this account." />
-            </StackPanel>
+        <!-- Copy feed -->
+        <Border Grid.Column="1" Style="{StaticResource Card}" Padding="8,4,8,8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Text="COPY FEED" Style="{StaticResource CardLabel}" Margin="12,12,0,8" />
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Feed}" RowHeight="52">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="TIME" Width="96" Binding="{Binding TimeText}" />
+                        <DataGridTextColumn Header="WALLET" Width="110" Binding="{Binding WalletLabel}" />
+                        <DataGridTextColumn Header="THEIR TRADE" Width="*" Binding="{Binding TheirText}" />
+                        <DataGridTextColumn Header="OUR MIRROR" Width="130" Binding="{Binding OurText}" />
+                        <DataGridTemplateColumn Header="STATUS" Width="90">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource Badge}" Background="{Binding StatusBackground}"
+                                            HorizontalAlignment="Left">
+                                        <TextBlock Text="{Binding StatusText}" Style="{StaticResource BadgeText}"
+                                                   Foreground="{Binding StatusBrush}" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
         </Border>
     </Grid>
 </UserControl>
