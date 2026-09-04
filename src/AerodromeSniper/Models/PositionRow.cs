@@ -10,4 +10,6 @@ public class PositionRow
     public required string ValueUsd { get; init; }
     public double PnlPct { get; init; }
     public required SolidColorBrush Accent { get; init; }
+    public string EntryText { get; init; } = string.Empty;
+    public string LastPriceText { get; init; } = string.Empty;
 }

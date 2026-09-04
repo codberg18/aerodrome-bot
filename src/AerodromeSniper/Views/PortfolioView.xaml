@@ -1,5 +1,216 @@
 <UserControl x:Class="AerodromeSniper.Views.PortfolioView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <TextBlock Text="Portfolio" FontSize="20" FontWeight="SemiBold" Margin="28,22" />
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:models="clr-namespace:AerodromeSniper.Models"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.WPF;assembly=LiveChartsCore.SkiaSharpView.WPF">
+    <UserControl.Resources>
+        <DataTemplate DataType="{x:Type models:PositionRow}">
+            <Grid Margin="0,2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.4*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="80" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="28" Height="28" CornerRadius="14" Background="{Binding Accent}">
+                        <TextBlock Text="{Binding Initials}" FontSize="10" FontWeight="Bold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="{Binding Symbol}" FontSize="13" FontWeight="SemiBold"
+                               Margin="10,0,0,0" VerticalAlignment="Center" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding QuantityText}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="{Binding EntryText}" VerticalAlignment="Center"
+                           Foreground="{StaticResource TextMutedBrush}" />
+                <TextBlock Grid.Column="3" Text="{Binding LastPriceText}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="4" Text="{Binding ValueUsd}" VerticalAlignment="Center" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="5" Text="{Binding PnlPct, Converter={StaticResource PnlFormat}}"
+                           VerticalAlignment="Center" FontWeight="SemiBold"
+                           Foreground="{Binding PnlPct, Converter={StaticResource PnlBrush}}" />
+                <Button Grid.Column="6" Style="{StaticResource DangerButton}" Height="28" Padding="12,0"
+                        Content="Close" HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Command="{Binding DataContext.ClosePositionCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                        CommandParameter="{Binding}" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid Margin="28,22,28,28">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Balances -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="1.6*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Card}" Margin="0,0,16,0">
+                <StackPanel>
+                    <TextBlock Text="USDC BALANCE" Style="{StaticResource CardLabel}" />
+                    <TextBlock Text="{Binding UsdcBalance}" Style="{StaticResource StatValue}" Margin="0,12,0,0" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource Card}" Margin="0,0,16,0">
+                <StackPanel>
+                    <TextBlock Text="WETH BALANCE" Style="{StaticResource CardLabel}" />
+                    <TextBlock Text="{Binding WethBalance}" Style="{StaticResource StatValue}" Margin="0,12,0,0" />
+                    <TextBlock Text="{Binding WethBalanceUsd}" FontSize="12"
+                               Foreground="{StaticResource TextMutedBrush}" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20,14">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="110" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <lvc:PieChart Grid.Column="0" Series="{Binding AllocationSeries}"
+                                  TooltipPosition="Hidden" Background="Transparent" />
+                    <StackPanel Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource PrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="USDC · 37%" FontSize="12" Margin="8,0,0,0"
+                                       Foreground="{StaticResource TextMutedBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource AccentVioletBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="WETH · 43%" FontSize="12" Margin="8,0,0,0"
+                                       Foreground="{StaticResource TextMutedBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource ProfitBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Tokens · 20%" FontSize="12" Margin="8,0,0,0"
+                                       Foreground="{StaticResource TextMutedBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Positions + PnL chart -->
+        <Grid Grid.Row="1" Margin="0,0,0,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Style="{StaticResource Card}" Padding="8,4,8,8" Margin="0,0,16,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="OPEN POSITIONS" Style="{StaticResource CardLabel}" Margin="12,12,0,4" />
+                    <Grid Grid.Row="1" Margin="14,4,14,4">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="1.4*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" /><ColumnDefinition Width="*" /><ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="80" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="TOKEN" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextFaintBrush}" />
+                        <TextBlock Grid.Column="1" Text="QTY" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextFaintBrush}" />
+                        <TextBlock Grid.Column="2" Text="ENTRY" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextFaintBrush}" />
+                        <TextBlock Grid.Column="3" Text="LAST" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextFaintBrush}" />
+                        <TextBlock Grid.Column="4" Text="VALUE" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextFaintBrush}" />
+                        <TextBlock Grid.Column="5" Text="UNREALIZED" FontSize="10.5" FontWeight="SemiBold" Foreground="{StaticResource TextFaintBrush}" />
+                    </Grid>
+                    <ItemsControl Grid.Row="2" ItemsSource="{Binding Positions}" Margin="14,0,14,8" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="180" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="P&amp;L BY TOKEN" Style="{StaticResource CardLabel}" />
+                    <lvc:CartesianChart Grid.Row="1" Margin="0,10,0,0" Background="Transparent"
+                                        Series="{Binding PnlSeries}" XAxes="{Binding PnlXAxes}"
+                                        YAxes="{Binding PnlYAxes}" TooltipPosition="Hidden" />
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- History -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Padding="8,4,8,8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="0" Margin="12,12,12,10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="200" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="TRADE HISTORY" Style="{StaticResource CardLabel}"
+                               VerticalAlignment="Center" />
+                    <ComboBox Grid.Column="2" Style="{StaticResource DarkComboBox}" Width="110" Height="34"
+                              SelectedIndex="{Binding SideIndex}">
+                        <ComboBoxItem Content="Side: all" />
+                        <ComboBoxItem Content="Buys" />
+                        <ComboBoxItem Content="Sells" />
+                    </ComboBox>
+                    <ComboBox Grid.Column="3" Style="{StaticResource DarkComboBox}" Width="120" Height="34"
+                              Margin="10,0,0,0" SelectedIndex="{Binding SourceIndex}">
+                        <ComboBoxItem Content="Source: all" />
+                        <ComboBoxItem Content="Manual" />
+                        <ComboBoxItem Content="Sniper" />
+                        <ComboBoxItem Content="Copy" />
+                    </ComboBox>
+                    <Grid Grid.Column="4" Margin="10,0,0,0">
+                        <TextBox Style="{StaticResource TextInput}" Height="34" Padding="32,7,10,7"
+                                 Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                        <Path Data="{StaticResource IconSearch}" Width="13" Height="13" Stretch="Uniform"
+                              Stroke="{StaticResource TextFaintBrush}" StrokeThickness="2"
+                              VerticalAlignment="Center" HorizontalAlignment="Left" Margin="11,0,0,0"
+                              IsHitTestVisible="False" />
+                    </Grid>
+                </Grid>
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding History}" RowHeight="46">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="TIME" Width="96" Binding="{Binding TimeText}" />
+                        <DataGridTemplateColumn Header="SIDE" Width="60">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Side}" FontWeight="SemiBold"
+                                               Foreground="{Binding SideBrush}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="SOURCE" Width="80" Binding="{Binding Source}" />
+                        <DataGridTextColumn Header="TOKEN" Width="90" Binding="{Binding Symbol}" />
+                        <DataGridTextColumn Header="QTY" Width="*" Binding="{Binding QuantityText}" />
+                        <DataGridTextColumn Header="PRICE" Width="96" Binding="{Binding PriceText}" />
+                        <DataGridTextColumn Header="VALUE" Width="96" Binding="{Binding ValueText}" />
+                        <DataGridTemplateColumn Header="REALIZED P&amp;L" Width="110">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding RealizedPnlText}" FontWeight="SemiBold"
+                                               Foreground="{Binding RealizedPnlPct, Converter={StaticResource PnlBrush}}" />
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+    </Grid>
 </UserControl>
