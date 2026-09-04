@@ -186,7 +186,7 @@
 
                 <DataGrid Grid.Row="1" ItemsSource="{Binding History}" RowHeight="46">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="TIME" Width="96" Binding="{Binding TimeText}" />
+                        <DataGridTextColumn Header="TIME" Width="100" Binding="{Binding TimeText}" />
                         <DataGridTemplateColumn Header="SIDE" Width="60">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
@@ -198,7 +198,7 @@
                         <DataGridTextColumn Header="SOURCE" Width="80" Binding="{Binding Source}" />
                         <DataGridTextColumn Header="TOKEN" Width="90" Binding="{Binding Symbol}" />
                         <DataGridTextColumn Header="QTY" Width="*" Binding="{Binding QuantityText}" />
-                        <DataGridTextColumn Header="PRICE" Width="96" Binding="{Binding PriceText}" />
+                        <DataGridTextColumn Header="PRICE" Width="104" Binding="{Binding PriceText}" />
                         <DataGridTextColumn Header="VALUE" Width="96" Binding="{Binding ValueText}" />
                         <DataGridTemplateColumn Header="REALIZED P&amp;L" Width="110">
                             <DataGridTemplateColumn.CellTemplate>
