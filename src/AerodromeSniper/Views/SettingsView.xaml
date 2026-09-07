@@ -1,5 +1,89 @@
 <UserControl x:Class="AerodromeSniper.Views.SettingsView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <TextBlock Text="Settings" FontSize="20" FontWeight="SemiBold" Margin="28,22" />
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="28,22,18,28">
+        <StackPanel MaxWidth="760" HorizontalAlignment="Left">
+
+            <!-- Polling -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="DATA FEEDS" Style="{StaticResource CardLabel}" Margin="0,0,0,16" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="NEW POOLS, SEC" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                            <TextBox Style="{StaticResource TextInput}" Text="{Binding NewPoolsInterval, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="PRICES, SEC" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                            <TextBox Style="{StaticResource TextInput}" Text="{Binding PricesInterval, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="4">
+                            <TextBlock Text="WALLETS, SEC" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                            <TextBox Style="{StaticResource TextInput}" Text="{Binding WalletsInterval, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="GECKOTERMINAL API" Style="{StaticResource CardLabel}" Margin="0,16,0,8" />
+                    <TextBox Style="{StaticResource TextInput}" Text="{Binding GeckoEndpoint, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="BLOCKSCOUT API" Style="{StaticResource CardLabel}" Margin="0,12,0,8" />
+                    <TextBox Style="{StaticResource TextInput}" Text="{Binding BlockscoutEndpoint, UpdateSourceTrigger=PropertyChanged}" />
+                    <TextBlock Text="BASE RPC" Style="{StaticResource CardLabel}" Margin="0,12,0,8" />
+                    <TextBox Style="{StaticResource TextInput}" Text="{Binding RpcEndpoint, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Trading -->
+            <Border Style="{StaticResource Card}" Margin="0,0,0,16">
+                <StackPanel>
+                    <TextBlock Text="TRADING" Style="{StaticResource CardLabel}" Margin="0,0,0,16" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="12" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="DEFAULT SLIPPAGE, %" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                            <TextBox Style="{StaticResource TextInput}" Text="{Binding SlippagePct, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="LP FEE, %" Style="{StaticResource CardLabel}" Margin="0,0,0,8" />
+                            <TextBox Style="{StaticResource TextInput}" Text="{Binding FeePct, UpdateSourceTrigger=PropertyChanged}" />
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,14,0,0" TextWrapping="Wrap"
+                               Text="Slippage and fee are applied to every order on top of the live pool price." />
+                </StackPanel>
+            </Border>
+
+            <!-- Data -->
+            <Border Style="{StaticResource Card}">
+                <StackPanel>
+                    <TextBlock Text="ACCOUNT &amp; DATA" Style="{StaticResource CardLabel}" Margin="0,0,0,16" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource SecondaryButton}" Command="{Binding OpenDataFolderCommand}">
+                            <StackPanel Orientation="Horizontal">
+                                <Path Data="{StaticResource IconFolder}" Width="14" Height="14" Stretch="Uniform"
+                                      Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                                      StrokeThickness="1.8" StrokeLineJoin="Round"
+                                      VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <TextBlock Text="Open data folder" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource DangerButton}" Margin="12,0,0,0"
+                                Command="{Binding ResetAccountCommand}" Content="Reset account" />
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource MutedText}" Margin="0,14,0,0" TextWrapping="Wrap"
+                               Text="{Binding DataFolderPath}" FontFamily="Consolas" FontSize="11" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
