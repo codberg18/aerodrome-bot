@@ -7,7 +7,14 @@
         Background="{StaticResource BackgroundBrush}"
         FontFamily="{StaticResource InterFont}" FontSize="13"
         Foreground="{StaticResource TextPrimaryBrush}"
-        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True">
+        TextOptions.TextFormattingMode="Ideal" UseLayoutRounding="True"
+        WindowStyle="None">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="36" ResizeBorderThickness="6" GlassFrameThickness="0"
+                      CornerRadius="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None" />
+    </WindowChrome.WindowChrome>
+    <Border x:Name="RootBorder" Background="{StaticResource BackgroundBrush}"
+            BorderBrush="{StaticResource BorderSubtleBrush}" BorderThickness="1">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="236" />
@@ -93,12 +100,33 @@
         <!-- Content -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="36" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
+            <!-- Caption buttons -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Right"
+                        VerticalAlignment="Top" WindowChrome.IsHitTestVisibleInChrome="True">
+                <Button Style="{StaticResource CaptionButton}" Click="OnMinimize" ToolTip="Minimize">
+                    <Path Data="M6,12 H18" Width="12" Height="12" Stretch="Uniform"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.6" StrokeStartLineCap="Round" />
+                </Button>
+                <Button Style="{StaticResource CaptionButton}" Click="OnToggleMaximize" ToolTip="Maximize">
+                    <Path Data="M7,7 H17 V17 H7 Z" Width="11" Height="11" Stretch="Uniform"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.4" StrokeLineJoin="Round" />
+                </Button>
+                <Button Style="{StaticResource CaptionCloseButton}" Click="OnCloseClick" ToolTip="Close">
+                    <Path Data="{StaticResource IconX}" Width="12" Height="12" Stretch="Uniform"
+                          Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                          StrokeThickness="1.6" StrokeStartLineCap="Round" />
+                </Button>
+            </StackPanel>
+
             <!-- Top bar -->
-            <Grid Grid.Row="0" Margin="28,20,28,16">
+            <Grid Grid.Row="1" Margin="28,4,28,16">
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="{Binding CurrentPage.Title}" Style="{StaticResource PageTitle}" />
                     <TextBlock Text="{Binding CurrentPage.Subtitle}" Style="{StaticResource PageSubtitle}" />
@@ -115,11 +143,12 @@
                     </StackPanel>
                 </Border>
             </Grid>
-            <Border Grid.Row="0" VerticalAlignment="Bottom" BorderBrush="{StaticResource BorderSubtleBrush}"
+            <Border Grid.Row="1" VerticalAlignment="Bottom" BorderBrush="{StaticResource BorderSubtleBrush}"
                     BorderThickness="0,0,0,1" />
 
             <!-- Page -->
-            <ContentControl Grid.Row="1" Content="{Binding CurrentPage}" Focusable="False" />
+            <ContentControl Grid.Row="2" Content="{Binding CurrentPage}" Focusable="False" />
         </Grid>
     </Grid>
+    </Border>
 </Window>
