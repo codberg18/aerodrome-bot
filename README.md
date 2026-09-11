@@ -4,6 +4,10 @@ A Windows desktop terminal for trading on Aerodrome Finance (Base).
 It shows new pools the moment they appear, mirrors wallets you follow,
 and keeps balances, positions and fills in one window.
 
+Built this because I got tired of keeping three browser tabs open: one with
+new pools, one with a whale wallet, one with my own positions. Now its one
+window.
+
 ## What it does
 
 - **Sniper** — live feed of new Aerodrome pools with liquidity, age and quote
@@ -42,3 +46,32 @@ dotnet run --project AerodromeSniper
 ![dashboard](img/dashboard.png)
 
 ![sniper](img/sniper.png)
+
+## Some tips
+
+- start with the liqudity filter at $10k or higher, below that most new
+  Aerodrome pools are noise that dies within the hour
+- for copy trading pick wallets that do 3-10 trades a day; whoever trades
+  a hundred times a day is farming something else and you will eat fees
+- keep default slippage at 1% for pools above $100k liquidity, thin pools
+  need more but price impact eats you anyway
+- the +50 / -25 take-profit and stop-loss pair is my default for snipes,
+  adjust it per token, not per mood
+
+## Known issues
+
+- The new-pool feed polls GeckoTerminal on an interval; when their free tier
+  answers with 429 the cycle is skipped and the next one picks up.
+- Copy tracking reads the public Blockscout API. Wallets that push hundreds
+  of transfers a minute can lag a block or two behind.
+- Maximized window keeps a small padding on some DPI scales, a side effect
+  of the custom chrome.
+
+## License
+
+MIT
+
+## Donate
+
+If this saved you some time, ETH on Base works:
+`0x4b7Ea2d1C0f39e8B6a5D2e9F1c8B7a6E5d4C3b2A`
