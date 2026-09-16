@@ -11,6 +11,8 @@ namespace AerodromeSniper.Services.Market;
 public class GeckoTerminalClient : IMarketDataService
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
+    private static readonly HashSet<string> AerodromeDexes =
+        ["aerodrome-base", "aerodrome-slipstream", "aerodrome-slipstream-2"];
 
     private readonly HttpClient _http;
     private readonly ISettingsStore _settings;
@@ -25,41 +27,25 @@ public class GeckoTerminalClient : IMarketDataService
 
     public async Task<IReadOnlyList<PoolInfo>> GetNewPoolsAsync(CancellationToken ct = default)
     {
-        var url = _settings.Current.GeckoBaseUrl.TrimEnd('/') + "/networks/base/new_pools?page=1";
-        var dto = await GetAsync<NewPoolsResponse>(url, ct);
-        if (dto is null) return [];
-
-        var tokens = dto.Included?
-            .Where(t => t.Id is not null)
-            .ToDictionary(t => t.Id!, t => t) ?? new Dictionary<string, TokenDto>();
-
+        // FIXME: the loop stops at the first page that has anything aerodrome,
+        // on quiet nights that burns 3 requests for an empty list
         var pools = new List<PoolInfo>();
-        foreach (var pool in dto.Data ?? [])
+        for (var page = 1; page <= 3 && pools.Count == 0; page++)
         {
-            var baseToken = Resolve(tokens, pool.Relationships?.BaseToken?.Data?.Id);
-            var quoteToken = Resolve(tokens, pool.Relationships?.QuoteToken?.Data?.Id);
-            if (baseToken is null || quoteToken is null) continue;
-            if (pool.Attributes?.DexId is null || !pool.Attributes.DexId.StartsWith("aerodrome", StringComparison.OrdinalIgnoreCase)) continue;
+            var url = _settings.Current.GeckoBaseUrl.TrimEnd('/') + $"/networks/base/new_pools?page={page}";
+            var dto = await GetAsync<NewPoolsResponse>(url, ct);
+            if (dto?.Data is null) continue;
 
-            pools.Add(new PoolInfo
+            foreach (var pool in dto.Data)
             {
-                Address = pool.Attributes.PoolAddress ?? pool.Id?.Replace("base/", "") ?? string.Empty,
-                DexId = pool.Attributes.DexId,
-                BaseToken = baseToken,
-                QuoteToken = quoteToken,
-                PriceUsd = Parse(pool.Attributes.PriceUsd),
-                LiquidityUsd = Parse(pool.Attributes.ReserveInUsd),
-                Volume24hUsd = pool.Attributes.VolumeUsd?.H24 is null ? 0m : Parse(pool.Attributes.VolumeUsd.H24),
-                FdvUsd = Parse(pool.Attributes.FdvUsd),
-                MarketCapUsd = Parse(pool.Attributes.MarketCapUsd),
-                PriceChangePct24h = Parse(pool.Attributes.PriceChangePercentage?.H24),
-                CreatedAt = pool.Attributes.PoolCreatedAt is null
-                    ? DateTimeOffset.UtcNow
-                    : DateTimeOffset.Parse(pool.Attributes.PoolCreatedAt)
-            });
+                var dexId = pool.Relationships?.Dex?.Data?.Id;
+                if (dexId is null || !AerodromeDexes.Contains(dexId)) continue;
+                var parsed = ParsePool(pool, dexId);
+                if (parsed is not null) pools.Add(parsed);
+            }
         }
 
-        _logger.LogDebug("New pools fetched: {Count}", pools.Count);
+        _logger.LogDebug("New Aerodrome pools fetched: {Count}", pools.Count);
         return pools;
     }
 
@@ -73,6 +59,50 @@ public class GeckoTerminalClient : IMarketDataService
         return Parse(prices.Values.First());
     }
 
+    private static PoolInfo? ParsePool(PoolDto pool, string dexId)
+    {
+        // TODO: token icons live on the gecko cdn, cache them under %LocalAppData%
+        // before wiring icons into the pool rows
+        var attr = pool.Attributes;
+        if (attr is null) return null;
+
+        var baseId = pool.Relationships?.BaseToken?.Data?.Id;
+        var quoteId = pool.Relationships?.QuoteToken?.Data?.Id;
+        if (baseId is null || quoteId is null) return null;
+
+        var parts = (attr.Name ?? string.Empty).Split(" / ");
+        if (parts.Length < 2) return null;
+        var quoteSymbol = parts[1].Split(' ')[0];
+
+        return new PoolInfo
+        {
+            Address = attr.Address ?? string.Empty,
+            DexId = dexId,
+            BaseToken = new TokenRef
+            {
+                Address = StripNetwork(baseId),
+                Symbol = parts[0].Trim()
+            },
+            QuoteToken = new TokenRef
+            {
+                Address = StripNetwork(quoteId),
+                Symbol = quoteSymbol
+            },
+            PriceUsd = Parse(attr.BaseTokenPriceUsd),
+            LiquidityUsd = Parse(attr.ReserveInUsd),
+            Volume24hUsd = Parse(attr.VolumeUsd?.H24),
+            FdvUsd = Parse(attr.FdvUsd),
+            MarketCapUsd = Parse(attr.MarketCapUsd),
+            PriceChangePct24h = Parse(attr.PriceChangePercentage?.H24),
+            CreatedAt = attr.PoolCreatedAt is null
+                ? DateTimeOffset.UtcNow
+                : DateTimeOffset.Parse(attr.PoolCreatedAt)
+        };
+    }
+
+    private static string StripNetwork(string id) =>
+        id.Contains('_') ? id[(id.IndexOf('_') + 1)..] : id;
+
     private async Task<T?> GetAsync<T>(string url, CancellationToken ct) where T : class
     {
         var started = Environment.TickCount64;
@@ -84,7 +114,8 @@ public class GeckoTerminalClient : IMarketDataService
             if (!response.IsSuccessStatusCode)
             {
                 var body = await response.Content.ReadAsStringAsync(ct);
-                _logger.LogWarning("GeckoTerminal {Status}: {Body}", (int)response.StatusCode, body[..Math.Min(500, body.Length)]);
+                _logger.LogWarning("GeckoTerminal {Status}: {Body}", (int)response.StatusCode,
+                    body[..Math.Min(500, body.Length)]);
                 return null;
             }
             return await response.Content.ReadFromJsonAsync<T>(Json, ct);
@@ -96,19 +127,6 @@ public class GeckoTerminalClient : IMarketDataService
         }
     }
 
-    private static TokenRef? Resolve(Dictionary<string, TokenDto> tokens, string? id)
-    {
-        if (id is null || !tokens.TryGetValue(id, out var dto)) return null;
-        return new TokenRef
-        {
-            Address = id.Contains('/') ? id[(id.IndexOf('/') + 1)..] : id,
-            Symbol = dto.Attributes?.Symbol ?? "?",
-            Name = dto.Attributes?.Name ?? string.Empty,
-            Decimals = dto.Attributes?.Decimals ?? 18,
-            IconUrl = dto.Attributes?.IconUrl ?? string.Empty
-        };
-    }
-
     private static decimal Parse(string? value) =>
         decimal.TryParse(value, System.Globalization.NumberStyles.Float,
             System.Globalization.CultureInfo.InvariantCulture, out var result) ? result : 0m;
@@ -116,21 +134,19 @@ public class GeckoTerminalClient : IMarketDataService
     private sealed record NewPoolsResponse
     {
         public List<PoolDto>? Data { get; init; }
-        public List<TokenDto>? Included { get; init; }
     }
 
     private sealed record PoolDto
     {
-        public string? Id { get; init; }
         public PoolAttributes? Attributes { get; init; }
         public PoolRelationships? Relationships { get; init; }
     }
 
     private sealed record PoolAttributes
     {
-        [JsonPropertyName("dex_id")] public string? DexId { get; init; }
-        [JsonPropertyName("address")] public string? PoolAddress { get; init; }
-        [JsonPropertyName("price_usd")] public string? PriceUsd { get; init; }
+        public string? Name { get; init; }
+        [JsonPropertyName("address")] public string? Address { get; init; }
+        [JsonPropertyName("base_token_price_usd")] public string? BaseTokenPriceUsd { get; init; }
         [JsonPropertyName("reserve_in_usd")] public string? ReserveInUsd { get; init; }
         [JsonPropertyName("volume_usd")] public VolumeDto? VolumeUsd { get; init; }
         [JsonPropertyName("fdv_usd")] public string? FdvUsd { get; init; }
@@ -153,6 +169,7 @@ public class GeckoTerminalClient : IMarketDataService
     {
         [JsonPropertyName("base_token")] public RefWrapper? BaseToken { get; init; }
         [JsonPropertyName("quote_token")] public RefWrapper? QuoteToken { get; init; }
+        [JsonPropertyName("dex")] public RefWrapper? Dex { get; init; }
     }
 
     private sealed record RefWrapper
@@ -163,20 +180,6 @@ public class GeckoTerminalClient : IMarketDataService
     private sealed record RefData
     {
         public string? Id { get; init; }
-    }
-
-    private sealed record TokenDto
-    {
-        public string? Id { get; init; }
-        public TokenAttributes? Attributes { get; init; }
-    }
-
-    private sealed record TokenAttributes
-    {
-        public string? Symbol { get; init; }
-        public string? Name { get; init; }
-        public int? Decimals { get; init; }
-        [JsonPropertyName("icon_url")] public string? IconUrl { get; init; }
     }
 
     private sealed record PriceResponse
