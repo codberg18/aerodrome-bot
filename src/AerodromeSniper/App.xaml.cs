@@ -1,7 +1,11 @@
-﻿using System.Windows;
+﻿using System.IO;
+using System.Windows;
+using AerodromeSniper.Services.Storage;
+using AerodromeSniper.Services.Trading;
 using AerodromeSniper.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace AerodromeSniper;
 
@@ -11,9 +15,23 @@ public partial class App : Application
 
     public App()
     {
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.File(Path.Combine(Paths.LogsDir, "app-.log"),
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 7,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
+
         _host = Host.CreateDefaultBuilder()
+            .UseSerilog()
             .ConfigureServices(services =>
             {
+                services.AddSingleton<IJsonStore>(_ => new JsonFileStore(Paths.DataDir));
+                services.AddSingleton<ISettingsStore, SettingsStore>();
+                services.AddSingleton<ITradeJournal, TradeJournal>();
+                services.AddSingleton<ITradingEngine, TradingEngine>();
+
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<DashboardViewModel>();
                 services.AddSingleton<SniperViewModel>();
@@ -36,6 +54,7 @@ public partial class App : Application
     {
         _host.StopAsync(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
         _host.Dispose();
+        Log.CloseAndFlush();
         base.OnExit(e);
     }
 }
