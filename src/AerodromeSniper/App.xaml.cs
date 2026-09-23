@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
+using AerodromeSniper.Services.Chain;
+using AerodromeSniper.Services.Market;
 using AerodromeSniper.Services.Storage;
 using AerodromeSniper.Services.Trading;
 using AerodromeSniper.ViewModels;
@@ -31,6 +33,9 @@ public partial class App : Application
                 services.AddSingleton<ISettingsStore, SettingsStore>();
                 services.AddSingleton<ITradeJournal, TradeJournal>();
                 services.AddSingleton<ITradingEngine, TradingEngine>();
+                services.AddHttpClient<IMarketDataService, GeckoTerminalClient>(c => c.Timeout = TimeSpan.FromSeconds(15));
+                services.AddHttpClient<IWalletActivityService, BlockscoutClient>(c => c.Timeout = TimeSpan.FromSeconds(15));
+                services.AddHttpClient<IChainStatusService, BaseRpcClient>(c => c.Timeout = TimeSpan.FromSeconds(10));
 
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<DashboardViewModel>();
