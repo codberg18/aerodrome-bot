@@ -25,7 +25,6 @@ public class BlockscoutClient : IWalletActivityService
 
     public async Task<IReadOnlyList<WalletTransfer>> GetTransfersAsync(string walletAddress, CancellationToken ct = default)
     {
-        // NOTE: blockscout public rate limits are undocumented, keep polling slow
         var url = _settings.Current.BlockscoutBaseUrl.TrimEnd('/') +
                   $"/addresses/{walletAddress}/token-transfers?type=ERC-20&limit=20";
         var started = Environment.TickCount64;
@@ -127,10 +126,11 @@ public class BaseRpcClient : IChainStatusService
     {
         try
         {
-            var payload = new { jsonrpc = "2.0", id = 1, method = "eth_blockNumber", @params = Array.Empty<object>() };
-            var response = await _http.PostAsJsonAsync(_settings.Current.RpcUrl, payload, ct);
+            var rpcRequest = new { jsonrpc = "2.0", id = 1, method = "eth_blockNumber", @params = Array.Empty<object>() };
+            var response = await _http.PostAsJsonAsync(_settings.Current.RpcUrl, rpcRequest, ct);
             var dto = await response.Content.ReadFromJsonAsync<RpcResponse>(Json, ct);
             if (dto?.Result is null) return 0;
+            // tried NBitcoin for hex parsing, overkill for one field, keeping Convert
             return Convert.ToInt64(dto.Result, 16);
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or FormatException)
